@@ -35,6 +35,15 @@
 
 #define GPIO_NOT_USED   (-1)
 #define DMA_DEFAULT_TRANSFER_SIZE   (0u)
+
+#ifdef CONFIG_IDF_TARGET_ESP32S3
+// Must use SPI_DMA_CH_AUTO for ESP32S3 
+    #define DMA_CHANNEL SPI_DMA_CH_AUTO
+#else
+// We use DMA channel 1 for all cases
+    #define DMA_CHANNEL 1
+#endif
+
 /**********************
  *      TYPEDEFS
  **********************/
@@ -99,9 +108,8 @@ void lvgl_interface_init(void)
     miso = TP_SPI_MISO;
 #endif
 
-    // We use DMA channel 1 for all cases
     lvgl_spi_driver_init(TFT_SPI_HOST, miso, DISP_SPI_MOSI, DISP_SPI_CLK,
-        spi_max_transfer_size, 1, DISP_SPI_IO2, DISP_SPI_IO3);
+        spi_max_transfer_size,DMA_CHANNEL, DISP_SPI_IO2, DISP_SPI_IO3);
 
     disp_spi_add_device(TFT_SPI_HOST);
 
