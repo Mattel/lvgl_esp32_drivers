@@ -49,7 +49,7 @@ disp_backlight_h disp_backlight_new(const disp_backlight_config_t *config)
             .channel = config->channel_idx,
             .intr_type = LEDC_INTR_DISABLE,
             .timer_sel = config->timer_idx,
-            .duty = 0,
+            .duty = 1023,
             .hpoint = 0
         };
         const ledc_timer_config_t LCD_backlight_timer = {
