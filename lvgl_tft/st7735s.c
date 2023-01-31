@@ -61,6 +61,39 @@ uint8_t st7735s_portrait_mode = 0;
  *   GLOBAL FUNCTIONS
  **********************/
 
+void st7735s_clear()
+{
+    uint8_t data[4] = {0};
+
+    /*Column addresses*/
+    st7735s_send_cmd(0x2A);
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 130;
+    st7735s_send_data(data, 4);
+
+    /*Page addresses*/
+    st7735s_send_cmd(0x2B);
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 162;
+    st7735s_send_data(data, 4);
+
+    /*Memory write*/
+    st7735s_send_cmd(0x2C);
+
+    uint8_t *c = malloc(21060);
+    memset(c, 0xff, 21060);
+
+    for (int i=2; i>0; i--) {
+        st7735s_send_data(c, 21060);
+    }
+
+    free(c);
+}
+
 void st7735s_init(void)
 {
 #ifdef CONFIG_LV_M5STICKC_HANDLE_AXP192
@@ -95,7 +128,7 @@ void st7735s_init(void)
 			0x2E, 0x2E, 0x37, 0x3F,
 			0x00, 0x00, 0x02, 0x10}, 16},           // 16 args, no delay:
 		{ST7735_NORON, {0}, TFT_INIT_DELAY},       	// Normal display on, no args, w/delay 10 ms delay
-		{ST7735_DISPON, {0}, TFT_INIT_DELAY},       // Main screen turn on, no args w/delay 100 ms delay
+		{ST7735_DISPOFF, {0}, TFT_INIT_DELAY},       // Main screen turn off, no args w/delay 100 ms delay
 		{0, {0}, 0xff}
     };
 
@@ -121,6 +154,14 @@ void st7735s_init(void)
 #endif
 
     st7735s_set_orientation(CONFIG_LV_DISPLAY_ORIENTATION);
+
+    // clean out framebuffer to white
+    st7735s_clear();
+
+    // turn on display after clearing
+    uint8_t data = 0;
+    st7735s_send_cmd(ST7735_DISPON);
+    st7735s_send_data(&data, 0);
 }
 
 void st7735s_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_map)
